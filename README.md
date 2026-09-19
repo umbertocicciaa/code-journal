@@ -27,7 +27,7 @@ openssl rand -base64 32
 2. Start Postgres (exposed on host port **5434** to avoid conflicts with a local Postgres on 5432):
 
 ```bash
-docker compose up db -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up db -d
 npm run db:migrate
 ```
 
@@ -48,15 +48,19 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Docker Compose (local / Portainer / Komodo)
 
-The root `docker-compose.yml` builds and runs `app` + `db`.
+The root `docker-compose.yml` builds and runs `app` + `db` on a private `internal` network. Host ports are not published by default (suited for reverse-proxy deploys).
+
+### Local development
 
 ```bash
 cp .env.example .env
 # set BETTER_AUTH_SECRET and APP_ENCRYPTION_KEY
-docker compose up --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-### Reverse proxy
+This exposes the app on port 3000 and Postgres on 5434.
+
+### Reverse proxy (production)
 
 Attach `app` to an existing external network (Traefik, nginx-proxy, etc.):
 
@@ -66,7 +70,7 @@ Attach `app` to an existing external network (Traefik, nginx-proxy, etc.):
 docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
 ```
 
-The app stays on the default Compose network for `db` and also joins `${PROXY_NETWORK}`.
+`app` and `db` share the `internal` network. Only `app` also joins `${PROXY_NETWORK}`; no host port is bound (avoids conflicts with other services on :3000).
 
 ### Portainer
 
