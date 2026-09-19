@@ -14,12 +14,7 @@ export function MarkdownViewer({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "prose prose-invert max-w-none prose-pre:rounded-2xl prose-pre:bg-black/30 prose-code:text-sky-200",
-        className,
-      )}
-    >
+    <div className={cn("markdown max-w-none", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize, rehypeHighlight]}

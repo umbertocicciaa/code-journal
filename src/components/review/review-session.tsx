@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X, Check } from "lucide-react";
+import { CodeBlock } from "@/components/code/code-block";
 import { MarkdownViewer } from "@/components/markdown/markdown-viewer";
 import { Badge, difficultyBadgeVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,15 +38,19 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
 
   if (entries.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center text-white/70">
-          No reviews due right now. Great job staying on top of your queue.
+      <Card tone="muted">
+        <CardContent className="py-14 text-center">
+          <p className="text-lg font-medium">Nothing due right now</p>
+          <p className="mt-1 text-sm text-muted">
+            Great job staying on top of your queue. Come back later.
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   const current = entries[index];
+  const progress = ((index + 1) / entries.length) * 100;
 
   function submit(outcome: "pass" | "fail") {
     startTransition(async () => {
@@ -69,11 +74,22 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-sm text-white/60">
-        <span>
-          Review {index + 1} of {entries.length}
-        </span>
-        <Link href={`/journal/${current.id}`} className="hover:text-white">
+      <div className="flex items-center justify-between gap-4 text-sm text-muted">
+        <div className="flex flex-1 items-center gap-3">
+          <span className="whitespace-nowrap font-medium text-foreground">
+            {index + 1} / {entries.length}
+          </span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+            <div
+              className="h-full rounded-full bg-accent transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+        <Link
+          href={`/journal/${current.id}`}
+          className="whitespace-nowrap hover:text-foreground hover:underline"
+        >
           Open in journal
         </Link>
       </div>
@@ -81,7 +97,7 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
-            <CardTitle>{current.problem.title}</CardTitle>
+            <CardTitle className="text-2xl">{current.problem.title}</CardTitle>
             <Badge variant={difficultyBadgeVariant(current.problem.difficulty)}>
               {current.problem.difficulty}
             </Badge>
@@ -90,9 +106,9 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
         <CardContent className="space-y-6">
           <MarkdownViewer content={current.problem.descriptionMd} />
 
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="rounded-[24px] border border-line bg-card-muted p-4 md:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="font-medium text-white">Notes & solutions</p>
+              <p className="font-medium">Notes & solutions</p>
               <Button
                 variant="secondary"
                 size="sm"
@@ -113,16 +129,16 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
               <div className="space-y-4">
                 <MarkdownViewer content={current.notesMd} />
                 {current.solutions.map((solution) => (
-                  <div key={solution.id}>
-                    <p className="mb-2 text-sm text-white/60">
-                      {solution.title} · {solution.language}
-                    </p>
-                    <MarkdownViewer content={solution.bodyMd} />
-                  </div>
+                  <CodeBlock
+                    key={solution.id}
+                    code={solution.bodyMd}
+                    language={solution.language}
+                    title={solution.title}
+                  />
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-muted">
                 Try to recall your approach before revealing your notes.
               </p>
             )}
@@ -131,13 +147,22 @@ export function ReviewSession({ entries }: { entries: ReviewEntry[] }) {
           <div className="flex gap-3">
             <Button
               variant="destructive"
+              size="lg"
+              className="flex-1"
               onClick={() => submit("fail")}
               disabled={isPending}
             >
-              Fail
+              <X className="h-4 w-4" />
+              Forgot
             </Button>
-            <Button onClick={() => submit("pass")} disabled={isPending}>
-              Pass
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => submit("pass")}
+              disabled={isPending}
+            >
+              <Check className="h-4 w-4" />
+              Remembered
             </Button>
           </div>
         </CardContent>

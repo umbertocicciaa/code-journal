@@ -4,22 +4,22 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default:
-          "bg-white/20 text-white shadow-lg shadow-black/10 backdrop-blur-xl hover:bg-white/30 border border-white/20",
+        default: "bg-ink text-ink-foreground shadow-sm hover:bg-black",
+        accent: "bg-accent text-white shadow-sm hover:bg-[#f25c2c]",
         secondary:
-          "bg-black/20 text-white/90 border border-white/10 hover:bg-black/30 backdrop-blur-md",
-        ghost: "hover:bg-white/10 text-white/80",
+          "border border-line bg-card text-foreground hover:bg-card-muted",
+        ghost: "text-muted hover:bg-black/5 hover:text-foreground",
         destructive:
-          "bg-red-500/20 text-red-100 border border-red-400/30 hover:bg-red-500/30",
+          "bg-accent-soft text-accent hover:bg-accent hover:text-white",
       },
       size: {
         default: "h-11 px-5 py-2",
-        sm: "h-9 rounded-xl px-3",
-        lg: "h-12 rounded-2xl px-8",
+        sm: "h-9 px-4 text-[13px]",
+        lg: "h-12 px-7 text-base",
         icon: "h-10 w-10",
       },
     },

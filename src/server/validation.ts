@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SOLUTION_LANGUAGE_IDS } from "@/lib/solution-languages";
 
 export const difficultySchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 export const userProblemStatusSchema = z.enum(["attempting", "solved"]);
@@ -52,8 +53,8 @@ export const updateUserProblemSchema = z.object({
 
 export const solutionSchema = z.object({
   title: z.string().min(1).max(120),
-  language: z.string().min(1).max(40),
-  bodyMd: z.string().max(100_000),
+  language: z.enum(SOLUTION_LANGUAGE_IDS),
+  bodyMd: z.string().min(1).max(100_000),
 });
 
 export const reviewSchema = z.object({

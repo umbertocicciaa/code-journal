@@ -68,7 +68,11 @@ export function LoginForm() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required />
           </div>
-          {error ? <p className="text-sm text-red-200">{error}</p> : null}
+          {error ? (
+            <p className="rounded-2xl bg-accent-soft px-3 py-2 text-sm text-accent">
+              {error}
+            </p>
+          ) : null}
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Signing in..." : "Sign in"}
           </Button>
@@ -145,7 +149,7 @@ export function SignupForm() {
               pattern="[a-zA-Z0-9_.]+"
               title="Letters, numbers, underscores, and dots only"
             />
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-muted">
               3–30 characters. Letters, numbers, underscores, and dots only.
             </p>
           </div>
@@ -157,7 +161,11 @@ export function SignupForm() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" minLength={8} required />
           </div>
-          {error ? <p className="text-sm text-red-200">{error}</p> : null}
+          {error ? (
+            <p className="rounded-2xl bg-accent-soft px-3 py-2 text-sm text-accent">
+              {error}
+            </p>
+          ) : null}
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Creating..." : "Create account"}
           </Button>

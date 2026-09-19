@@ -28,11 +28,11 @@ export function MarkdownEditor({
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder={placeholder}
-          className="min-h-[240px] font-mono"
+          className="min-h-[240px] font-mono text-[13px]"
         />
       </TabsContent>
       <TabsContent value="preview">
-        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+        <div className="rounded-2xl border border-line bg-card-muted p-4">
           <MarkdownViewer content={value} />
         </div>
       </TabsContent>

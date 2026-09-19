@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/layout/page-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { listKanbanProblems } from "@/server/repositories/user-problems";
 import { requireSession } from "@/server/session";
@@ -8,10 +9,10 @@ export default async function KanbanPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-white">Kanban</h1>
-        <p className="text-white/60">Drag cards between Leitner boxes</p>
-      </div>
+      <PageHeader
+        title="Kanban"
+        description="Drag cards between Leitner boxes to reschedule reviews"
+      />
       <KanbanBoard entries={entries} />
     </div>
   );

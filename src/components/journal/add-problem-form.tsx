@@ -11,8 +11,15 @@ import { useFeedback } from "@/components/feedback/feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const initialState: ActionResult<{ userProblemId: string }> = {
   success: false,
@@ -67,29 +74,32 @@ export function AddProblemForm() {
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card tone="ink">
         <CardHeader>
           <CardTitle>Add from LeetCode URL</CardTitle>
+          <CardDescription className="text-white/60">
+            Paste a problem link; title, difficulty, topics and description are fetched for you.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={urlAction} className="flex flex-col gap-4 md:flex-row">
+          <form action={urlAction} className="flex flex-col gap-3 md:flex-row">
             <Input
               name="url"
               placeholder="https://leetcode.com/problems/two-sum/"
               required
+              className="border-white/10 bg-white/10 text-white placeholder:text-white/40 focus-visible:border-white/30 focus-visible:ring-white/10"
             />
-            <Button type="submit" disabled={urlPending}>
+            <Button type="submit" variant="accent" disabled={urlPending} className="md:px-7">
               {urlPending ? "Fetching..." : "Add problem"}
             </Button>
           </form>
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            className="mt-3"
+            className="mt-3 text-sm text-white/60 underline-offset-4 transition hover:text-white hover:underline"
             onClick={() => setManualForced(true)}
           >
             Enter problem manually
-          </Button>
+          </button>
         </CardContent>
       </Card>
 
@@ -132,16 +142,15 @@ export function AddProblemForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="difficulty">Difficulty</Label>
-                  <select
+                  <Select
                     id="difficulty"
                     name="difficulty"
                     defaultValue={String(draft?.difficulty ?? "MEDIUM")}
-                    className="flex h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white"
                   >
                     <option value="EASY">Easy</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HARD">Hard</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">

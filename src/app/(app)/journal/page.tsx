@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { ChevronRight } from "lucide-react";
 import { AddProblemForm } from "@/components/journal/add-problem-form";
 import { JournalFilters } from "@/components/journal/journal-filters";
+import { PageHeader } from "@/components/layout/page-header";
 import { Badge, difficultyBadgeVariant } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   listUserProblems,
   listUserTags,
@@ -31,12 +33,14 @@ export default async function JournalPage({
     listUserTags(session.user.id),
   ]);
 
+  const solvedCount = entries.filter((entry) => entry.status === "solved").length;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-white">Journal</h1>
-        <p className="text-white/60">Your tracked LeetCode problems</p>
-      </div>
+      <PageHeader
+        title="Journal"
+        description={`${entries.length} tracked · ${solvedCount} solved`}
+      />
 
       <AddProblemForm />
 
@@ -44,35 +48,53 @@ export default async function JournalPage({
         <JournalFilters tags={tags} />
       </Suspense>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {entries.length === 0 ? (
-          <Card>
-            <CardContent className="py-10 text-center text-white/60">
+          <Card tone="muted">
+            <CardContent className="py-12 text-center text-muted">
               No problems yet. Add your first LeetCode URL above.
             </CardContent>
           </Card>
         ) : (
           entries.map((entry) => (
-            <Link key={entry.id} href={`/journal/${entry.id}`}>
-              <Card className="transition hover:bg-white/15">
-                <CardHeader className="flex flex-row items-center justify-between gap-4">
-                  <div>
-                    <CardTitle>{entry.problem.title}</CardTitle>
-                    <p className="text-sm text-white/50">{entry.problem.slug}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
+            <Link key={entry.id} href={`/journal/${entry.id}`} className="group">
+              <Card className="flex items-center gap-4 p-4 transition group-hover:border-ink/20 group-hover:shadow-[0_8px_24px_-16px_rgba(0,0,0,0.35)] md:p-5">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="truncate text-base font-semibold tracking-tight md:text-lg">
+                      {entry.problem.title}
+                    </h3>
                     <Badge variant={difficultyBadgeVariant(entry.problem.difficulty)}>
                       {entry.problem.difficulty}
                     </Badge>
-                    <Badge>{entry.status}</Badge>
-                    {entry.problem.problemTopics.map((topic) => (
-                      <Badge key={topic.topicId}>{topic.topic.name}</Badge>
-                    ))}
-                    {entry.userProblemTags.map((tag) => (
-                      <Badge key={tag.userTagId}>{tag.userTag.name}</Badge>
-                    ))}
+                    <Badge variant={entry.status === "solved" ? "accent" : "outline"}>
+                      {entry.status === "solved" ? "Solved" : "Attempting"}
+                    </Badge>
                   </div>
-                </CardHeader>
+                  <p className="mt-1 font-mono text-xs text-muted">{entry.problem.slug}</p>
+                  {entry.problem.problemTopics.length + entry.userProblemTags.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {entry.problem.problemTopics.map((topic) => (
+                        <Badge key={topic.topicId}>{topic.topic.name}</Badge>
+                      ))}
+                      {entry.userProblemTags.map((tag) => (
+                        <Badge
+                          key={tag.userTagId}
+                          className="border-transparent"
+                          style={{
+                            backgroundColor: `${tag.userTag.color}22`,
+                            color: tag.userTag.color,
+                          }}
+                        >
+                          {tag.userTag.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-card-muted text-muted transition group-hover:bg-ink group-hover:text-white">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
               </Card>
             </Link>
           ))

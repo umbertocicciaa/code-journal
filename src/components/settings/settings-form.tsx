@@ -48,8 +48,8 @@ export function SettingsForm({
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-white">Public stats</p>
-              <p className="text-sm text-white/60">
+              <p className="text-sm font-medium">Public stats</p>
+              <p className="text-sm text-muted">
                 Allow others to view your stats at /u/username
               </p>
             </div>
@@ -92,12 +92,13 @@ export function SettingsForm({
           <CardTitle>LeetCode Premium cookies</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-muted">
             Optional. Used server-side to fetch company tags for new problems.
             Stored encrypted with AES-256-GCM.
           </p>
           {hasLeetcodeCredential ? (
-            <p className="text-sm text-emerald-200">
+            <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-sm text-[#6b5a00]">
+              <span className="h-2 w-2 rounded-full bg-positive" />
               Credential saved
               {lastVerifiedAt
                 ? ` · verified ${lastVerifiedAt.toLocaleString()}`
@@ -172,13 +173,18 @@ export function SettingsForm({
             {tags.map((tag) => (
               <div
                 key={tag.id}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1 text-sm"
-                style={{ backgroundColor: `${tag.color}22` }}
+                className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium"
+                style={{
+                  backgroundColor: `${tag.color}22`,
+                  borderColor: `${tag.color}55`,
+                  color: tag.color,
+                }}
               >
                 {tag.name}
                 <button
                   type="button"
-                  className="text-white/50 hover:text-white"
+                  aria-label={`Remove tag ${tag.name}`}
+                  className="opacity-60 transition hover:opacity-100"
                   onClick={() =>
                     startTransition(async () => {
                       const result = await deleteUserTagAction(tag.id);
@@ -195,9 +201,26 @@ export function SettingsForm({
               </div>
             ))}
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-[1fr_140px_auto]">
             <Input id="tag-name" placeholder="Tag name" />
-            <Input id="tag-color" defaultValue="#6366f1" placeholder="#6366f1" />
+            <div className="relative">
+              <input
+                type="color"
+                aria-label="Tag color"
+                defaultValue="#ff6b3b"
+                className="absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
+                onChange={(event) => {
+                  const colorInput = document.getElementById("tag-color") as HTMLInputElement;
+                  colorInput.value = event.target.value;
+                }}
+              />
+              <Input
+                id="tag-color"
+                defaultValue="#ff6b3b"
+                placeholder="#ff6b3b"
+                className="pl-11 font-mono text-xs"
+              />
+            </div>
             <Button
               disabled={isPending}
               onClick={() =>

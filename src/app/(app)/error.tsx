@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,14 +23,14 @@ export default function AppError({
           <CardTitle>Something went wrong</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-white/70">
+          <p className="text-sm text-muted">
             An unexpected error occurred. You can retry or go back to your
             journal.
           </p>
           <div className="flex gap-2">
             <Button onClick={reset}>Try again</Button>
-            <Button variant="secondary" onClick={() => (window.location.href = "/journal")}>
-              Back to journal
+            <Button asChild variant="secondary">
+              <Link href="/journal">Back to journal</Link>
             </Button>
           </div>
         </CardContent>

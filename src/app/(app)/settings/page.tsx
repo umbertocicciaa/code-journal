@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/layout/page-header";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { getLeetcodeCredentials } from "@/server/repositories/leetcode-credentials";
 import { listUserTags } from "@/server/repositories/user-problems";
@@ -18,10 +19,10 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-white">Settings</h1>
-        <p className="text-white/60">Profile, tags, and LeetCode integration</p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Profile, tags, and LeetCode integration"
+      />
       <SettingsForm
         name={user.name}
         statsPublic={user.statsPublic}
