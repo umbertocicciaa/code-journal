@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/layout/page-header";
+import { JournalTransfer } from "@/components/settings/journal-transfer";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { getLeetcodeCredentials } from "@/server/repositories/leetcode-credentials";
 import { listUserTags } from "@/server/repositories/user-problems";
@@ -21,7 +22,7 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Settings"
-        description="Profile, tags, and LeetCode integration"
+        description="Profile, tags, LeetCode integration, and backups"
       />
       <SettingsForm
         name={user.name}
@@ -30,6 +31,7 @@ export default async function SettingsPage() {
         hasLeetcodeCredential={Boolean(credential)}
         lastVerifiedAt={credential?.lastVerifiedAt ?? null}
       />
+      <JournalTransfer />
     </div>
   );
 }
