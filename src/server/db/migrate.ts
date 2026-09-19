@@ -1,9 +1,13 @@
+import { existsSync } from "node:fs";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-config({ path: ".env" });
+// Optional for local dev only. CI and Docker provide DATABASE_URL via env.
+if (existsSync(".env")) {
+  config({ path: ".env" });
+}
 
 async function runMigrations() {
   const connectionString = process.env.DATABASE_URL;
