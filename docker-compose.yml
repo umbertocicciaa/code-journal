@@ -19,6 +19,7 @@ services:
   app:
     build: .
     image: code-journal:latest
+    pull_policy: build
     restart: unless-stopped
     depends_on:
       db:

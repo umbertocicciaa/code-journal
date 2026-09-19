@@ -70,15 +70,18 @@ The app stays on the default Compose network for `db` and also joins `${PROXY_NE
 
 ### Portainer
 
-1. Stacks → Add stack
-2. Paste `docker-compose.yml` (and set env vars in the UI)
-3. Deploy
+1. Stacks → Add stack → **Git repository** (not Web editor only)
+2. Point at this repo and set the compose path to `docker-compose.yml`
+3. Enable **Build** for the stack (the `app` service builds from the Dockerfile, it is not pulled from a registry)
+4. Set env vars in the UI and deploy
+
+If you see `pull access denied for code-journal`, the stack tried to pull instead of build. Redeploy with build enabled, or run `docker compose build app` on the host first.
 
 ### Komodo
 
-1. Create a stack from this repository
+1. Create a stack from this repository (with build context)
 2. Provide env vars: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `APP_ENCRYPTION_KEY`
-3. Deploy; migrations run automatically on container start
+3. Deploy with build; migrations run automatically on container start
 
 ## Features
 
