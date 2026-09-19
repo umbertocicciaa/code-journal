@@ -1,49 +1,62 @@
-import { nanoid } from "nanoid";
 import { describe, expect, it } from "vitest";
-import { db } from "@/server/db/client";
-import { user } from "@/server/db/schema";
-import { createProblem } from "@/server/repositories/problems";
 import {
   createUserProblem,
+  deleteUserProblem,
   listUserProblems,
   updateUserProblem,
 } from "@/server/repositories/user-problems";
+import { createProblem } from "@/server/repositories/problems";
+import { createTestUser, seedJournalEntry, uniqueSlug } from "./helpers";
 
 describe("user problem repository", () => {
   it("scopes journal entries to the user", async () => {
-    const userId = nanoid();
-    await db.insert(user).values({
-      id: userId,
-      name: "Test User",
-      email: `test-${Date.now()}@example.com`,
-      username: `user_${Date.now()}`,
-    });
+    const user = await createTestUser();
+    const { entry } = await seedJournalEntry({ userId: user.id });
 
-    const slug = `journal-problem-${Date.now()}`;
-    const problem = await createProblem({
-      slug,
-      title: "Journal Problem",
-      difficulty: "MEDIUM",
-      descriptionMd: "Notes",
-      url: `https://leetcode.com/problems/${slug}/`,
-      source: "manual",
-    });
-
-    const entry = await createUserProblem({
-      userId,
-      problemId: problem!.id,
-      status: "attempting",
-    });
-
-    await updateUserProblem(userId, entry!.id, {
+    await updateUserProblem(user.id, entry.id, {
       status: "solved",
       solvedAt: new Date(),
       leitnerBox: 1,
       nextReviewAt: new Date(),
     });
 
-    const rows = await listUserProblems(userId);
-    expect(rows.some((row) => row.id === entry!.id)).toBe(true);
-    expect(rows[0]?.status).toBe("solved");
+    const rows = await listUserProblems(user.id);
+    expect(rows.some((row) => row.id === entry.id)).toBe(true);
+    expect(rows.find((row) => row.id === entry.id)?.status).toBe("solved");
+  });
+
+  it("returns the existing entry when adding the same problem twice", async () => {
+    const user = await createTestUser();
+    const slug = uniqueSlug("duplicate");
+    const problem = await createProblem({
+      slug,
+      title: "Duplicate Problem",
+      difficulty: "EASY",
+      descriptionMd: "",
+      url: `https://leetcode.com/problems/${slug}/`,
+      source: "manual",
+    });
+
+    const first = await createUserProblem({
+      userId: user.id,
+      problemId: problem!.id,
+    });
+    const second = await createUserProblem({
+      userId: user.id,
+      problemId: problem!.id,
+    });
+
+    expect(second?.id).toBe(first?.id);
+    expect(await listUserProblems(user.id)).toHaveLength(1);
+  });
+
+  it("deletes a journal entry for the owner", async () => {
+    const user = await createTestUser();
+    const { entry } = await seedJournalEntry({ userId: user.id });
+
+    await deleteUserProblem(user.id, entry.id);
+
+    const rows = await listUserProblems(user.id);
+    expect(rows.some((row) => row.id === entry.id)).toBe(false);
   });
 });
