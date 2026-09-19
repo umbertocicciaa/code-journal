@@ -56,6 +56,18 @@ cp .env.example .env
 docker compose up --build
 ```
 
+### Reverse proxy
+
+Attach `app` to an existing external network (Traefik, nginx-proxy, etc.):
+
+```bash
+# create the network once, e.g. docker network create proxy
+# set PROXY_NETWORK in .env
+docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
+```
+
+The app stays on the default Compose network for `db` and also joins `${PROXY_NETWORK}`.
+
 ### Portainer
 
 1. Stacks → Add stack
