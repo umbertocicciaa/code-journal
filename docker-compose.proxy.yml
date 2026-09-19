@@ -1,4 +1,8 @@
 services:
+  db:
+    networks:
+      - internal
+
   app:
     ports: !reset []
     networks:

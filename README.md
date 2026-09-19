@@ -24,7 +24,7 @@ Generate a 32-byte encryption key:
 openssl rand -base64 32
 ```
 
-2. Start Postgres (exposed on host port **5434** to avoid conflicts with a local Postgres on 5432):
+2. Start Postgres (dev overlay publishes **5434** on the host for local tools; inside Compose, `app` reaches `db` on the internal network at port 5432):
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up db -d
@@ -48,7 +48,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Docker Compose (local / Portainer / Komodo)
 
-The root `docker-compose.yml` builds and runs `app` + `db` on a private `internal` network. Host ports are not published by default (suited for reverse-proxy deploys).
+The root `docker-compose.yml` builds and runs `app` + `db` on a private `internal` network. Services talk to each other by name (`db:5432`); Postgres is not published on the host unless you add the dev overlay.
 
 ### Local development
 
@@ -70,16 +70,16 @@ Attach `app` to an existing external network (Traefik, nginx-proxy, etc.):
 docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
 ```
 
-`app` and `db` share the `internal` network. Only `app` also joins `${PROXY_NETWORK}`; no host port is bound (avoids conflicts with other services on :3000).
+`app` and `db` stay on `internal`. Only `app` also joins `${PROXY_NETWORK}` for the reverse proxy; neither service binds host ports in this mode.
 
-Set auth env vars to your public URL (required for cookies and server-side auth):
+Set auth env vars to your public HTTPS URL (required for cookies and server-side auth):
 
 ```bash
-BETTER_AUTH_URL=https://leet.arcapi.net
-BETTER_AUTH_TRUSTED_ORIGINS=https://leet.arcapi.net
+BETTER_AUTH_URL=https://your-domain.example
+BETTER_AUTH_TRUSTED_ORIGINS=https://your-domain.example
 ```
 
-The browser auth client calls the same origin automatically, so you do not need to rebuild the image when the domain changes.
+The browser auth client uses the same origin automatically, so you do not need to rebuild the image when the domain changes.
 
 ### Portainer
 
