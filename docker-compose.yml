@@ -17,7 +17,8 @@ services:
       retries: 10
 
   app:
-    image: ghcr.io/arcangelo/code-journal:latest
+    build: .
+    image: code-journal:latest
     restart: unless-stopped
     depends_on:
       db:

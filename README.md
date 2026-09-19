@@ -48,7 +48,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Docker Compose (local / Portainer / Komodo)
 
-The root `docker-compose.yml` runs `app` + `db`. For local builds, `docker-compose.override.yml` builds from source.
+The root `docker-compose.yml` builds and runs `app` + `db`.
 
 ```bash
 cp .env.example .env
