@@ -72,6 +72,15 @@ docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
 
 `app` and `db` share the `internal` network. Only `app` also joins `${PROXY_NETWORK}`; no host port is bound (avoids conflicts with other services on :3000).
 
+Set auth env vars to your public URL (required for cookies and server-side auth):
+
+```bash
+BETTER_AUTH_URL=https://leet.arcapi.net
+BETTER_AUTH_TRUSTED_ORIGINS=https://leet.arcapi.net
+```
+
+The browser auth client calls the same origin automatically, so you do not need to rebuild the image when the domain changes.
+
 ### Portainer
 
 1. Stacks → Add stack → **Git repository** (not Web editor only)
@@ -84,7 +93,7 @@ If you see `pull access denied for code-journal`, the stack tried to pull instea
 ### Komodo
 
 1. Create a stack from this repository (with build context)
-2. Provide env vars: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `APP_ENCRYPTION_KEY`
+2. Provide env vars: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (public HTTPS URL), `APP_ENCRYPTION_KEY`
 3. Deploy with build; migrations run automatically on container start
 
 ## Features

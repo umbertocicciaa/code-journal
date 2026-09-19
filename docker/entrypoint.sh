@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-npx tsx src/server/db/migrate.ts
+node migrate.cjs
 
 echo "Starting Code Journal..."
 if [ -f server.js ]; then
