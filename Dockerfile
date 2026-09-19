@@ -23,7 +23,6 @@ RUN ./node_modules/.bin/esbuild src/server/db/migrate.ts \
     --bundle \
     --platform=node \
     --format=cjs \
-    --packages=external \
     --outfile=migrate.cjs
 
 FROM base AS runner
