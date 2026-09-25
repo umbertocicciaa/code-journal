@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { difficultyColors } from "@/components/ui/difficulty-colors";
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
@@ -30,7 +29,6 @@ export function Badge({
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
-export { difficultyColors };
 
 export function difficultyBadgeVariant(
   difficulty: "EASY" | "MEDIUM" | "HARD",
