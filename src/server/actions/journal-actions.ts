@@ -379,6 +379,7 @@ export async function updateSolutionAction(
       return actionError("Solution not found");
     }
 
+    revalidatePath(`/journal/${updated.userProblemId}`);
     revalidatePath("/journal");
     revalidatePath("/stats");
     return { success: true };
