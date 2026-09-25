@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const requireSession = vi.fn();
-const updateSolution = vi.fn();
+const { requireSession, updateSolution } = vi.hoisted(() => ({
+  requireSession: vi.fn(),
+  updateSolution: vi.fn(),
+}));
 
 vi.mock("@/server/session", () => ({ requireSession }));
 vi.mock("@/server/repositories/user-problems", () => ({
