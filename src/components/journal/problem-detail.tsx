@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ExternalLink, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { CodeBlock } from "@/components/code/code-block";
 import { SolutionEditor, type SolutionDraft } from "@/components/code/solution-editor";
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
@@ -31,6 +31,7 @@ import type { findUserProblemById } from "@/server/repositories/user-problems";
 import {
   createSolutionAction,
   deleteSolutionAction,
+  updateSolutionAction,
   deleteUserProblemAction,
   refreshProblemFromLeetcodeAction,
   updateUserProblemAction,
@@ -79,6 +80,8 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
     });
   }
 
+  const [editingSolutionId, setEditingSolutionId] = useState<string | null>(null);
+
   function addSolution(draft: SolutionDraft) {
     startTransition(async () => {
       const result = await createSolutionAction(entry.id, {
@@ -92,6 +95,26 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
       }
       feedback.showSuccess("Solution added", "Your solution was saved.");
       setEditorOpen(false);
+      router.refresh();
+    });
+  }
+
+  function editSolution(draft: SolutionDraft) {
+    if (!editingSolutionId) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await updateSolutionAction(editingSolutionId, {
+        title: draft.title,
+        language: draft.language,
+        bodyMd: draft.code,
+      });
+      if (!result.success) {
+        feedback.showError("Unable to update solution", result.error);
+        return;
+      }
+      feedback.showSuccess("Solution updated", "Your solution changes were saved.");
+      setEditingSolutionId(null);
       router.refresh();
     });
   }
@@ -248,25 +271,52 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
             </div>
           ) : null}
 
-          {entry.solutions.map((solution) => (
-            <CodeBlock
-              key={solution.id}
-              code={solution.bodyMd}
-              language={solution.language}
-              title={solution.title}
-              actions={
-                <button
-                  type="button"
-                  onClick={() => removeSolution(solution.id)}
-                  disabled={isPending}
-                  aria-label="Delete solution"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              }
-            />
-          ))}
+          {entry.solutions.map((solution) =>
+            editingSolutionId === solution.id ? (
+              <div key={solution.id} className="rounded-[24px] border border-line bg-card-muted p-4 md:p-5">
+                <SolutionEditor
+                  initial={{
+                    title: solution.title,
+                    language: solution.language,
+                    code: solution.bodyMd,
+                  }}
+                  onSubmit={editSolution}
+                  onCancel={() => setEditingSolutionId(null)}
+                  submitLabel="Update solution"
+                  pending={isPending}
+                />
+              </div>
+            ) : (
+              <CodeBlock
+                key={solution.id}
+                code={solution.bodyMd}
+                language={solution.language}
+                title={solution.title}
+                actions={
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setEditingSolutionId(solution.id)}
+                      disabled={isPending}
+                      aria-label={`Edit solution ${solution.title}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeSolution(solution.id)}
+                      disabled={isPending}
+                      aria-label={`Delete solution ${solution.title}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                }
+              />
+            )
+          )}
         </CardContent>
       </Card>
 
