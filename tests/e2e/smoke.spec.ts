@@ -35,7 +35,6 @@ test("MVP smoke: authenticated user can add a manual problem and edit its soluti
   await expect(page).toHaveURL(/\/journal\//);
 
   await expect(page.getByRole("heading", { name: "Solutions" })).toBeVisible();
-  await page.getByRole("button", { name: "New solution" }).click();
   await page.getByLabel("Title").fill("Original solution");
   await page.getByRole("button", { name: "Save solution" }).click();
   await expect(page.getByText("Original solution", { exact: true })).toBeVisible();
