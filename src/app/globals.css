@@ -17,6 +17,12 @@
   --brand: #ffe640;
   --brand-soft: #fff6bf;
   --positive: #1fb85a;
+  --difficulty-easy: #dcfce7;
+  --difficulty-easy-foreground: #166534;
+  --difficulty-medium: #fef3c7;
+  --difficulty-medium-foreground: #92400e;
+  --difficulty-hard: #fee2e2;
+  --difficulty-hard-foreground: #991b1b;
   --code-bg: #0d1117;
 }
 
@@ -36,6 +42,12 @@
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
   --color-positive: var(--positive);
+  --color-difficulty-easy: var(--difficulty-easy);
+  --color-difficulty-easy-foreground: var(--difficulty-easy-foreground);
+  --color-difficulty-medium: var(--difficulty-medium);
+  --color-difficulty-medium-foreground: var(--difficulty-medium-foreground);
+  --color-difficulty-hard: var(--difficulty-hard);
+  --color-difficulty-hard-foreground: var(--difficulty-hard-foreground);
   --color-code-bg: var(--code-bg);
   --radius-card: 28px;
   --font-sans: var(--font-outfit), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
