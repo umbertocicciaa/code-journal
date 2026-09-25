@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getLeitnerBoxLabel } from "@/lib/leitner";
+import { difficultyColors } from "@/components/ui/difficulty-colors";
 
 const palette = {
   accent: "#ff6b3b",
@@ -31,12 +32,6 @@ const palette = {
   grid: "rgba(0,0,0,0.06)",
   axis: "#9a9a97",
   track: "#efefec",
-};
-
-const difficultyColors = {
-  EASY: palette.brand,
-  MEDIUM: palette.accent,
-  HARD: palette.ink,
 };
 
 const tooltipStyle = {
