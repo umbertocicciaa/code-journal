@@ -7,7 +7,7 @@ test("home redirects to login when logged out", async ({ page }) => {
 });
 
 test("signup creates an account and exposes the journal", async ({ page }) => {
-  const username = `user_${Date.now()}`;
+  const username = `user${Date.now()}`;
   await page.goto("/signup");
   await page.getByRole("textbox", { name: "Name", exact: true }).fill("Playwright User");
   await page.getByRole("textbox", { name: "Username" }).fill(username);
@@ -19,7 +19,7 @@ test("signup creates an account and exposes the journal", async ({ page }) => {
 });
 
 test("MVP smoke: authenticated user can add a manual problem and edit its solution", async ({ page }) => {
-  const username = `mvp_${Date.now()}`;
+  const username = `mvp${Date.now()}`;
   await page.goto("/signup");
   await page.getByRole("textbox", { name: "Name", exact: true }).fill("MVP User");
   await page.getByRole("textbox", { name: "Username" }).fill(username);
