@@ -32,7 +32,7 @@ test("MVP smoke: authenticated user can add a manual problem and edit its soluti
 
   await page.getByPlaceholder("https://leetcode.com/problems/two-sum/").fill("https://leetcode.com/problems/two-sum/");
   await page.getByRole("button", { name: /Add problem/i }).click();
-  await page.getByRole("link", { name: /two-sum/i }).click();
+  await expect(page).toHaveURL(/\/journal\//);
 
   await expect(page.getByRole("heading", { name: "Solutions" })).toBeVisible();
   await page.getByRole("button", { name: "New solution" }).click();
