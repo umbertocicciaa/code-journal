@@ -39,7 +39,7 @@ test("MVP smoke: authenticated user can add a manual problem and edit its soluti
   await page.getByRole("button", { name: "Save solution" }).click();
   await expect(page.getByText("Original solution", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Edit solution Original solution" }).click();
+  await page.getByRole("button", { name: /Edit solution Original solution/ }).click();
   await expect(page.getByLabel("Title")).toHaveValue("Original solution");
   await page.getByLabel("Title").fill("Edited solution");
   await page.getByRole("button", { name: "Update solution" }).click();
