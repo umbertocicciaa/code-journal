@@ -300,24 +300,28 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
                 title={solution.title}
                 actions={
                   <>
-                    <button
+                    <Button
                       type="button"
+                      size="icon"
+                      variant="ghost"
                       onClick={() => setEditingSolutionId(solution.id)}
                       disabled={isPending}
                       aria-label={`Edit solution ${solution.title}`}
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                      className="h-8 w-8"
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      size="icon"
+                      variant="ghost"
                       onClick={() => removeSolution(solution.id)}
                       disabled={isPending}
                       aria-label={`Delete solution ${solution.title}`}
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                      className="h-8 w-8"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </>
                 }
               />

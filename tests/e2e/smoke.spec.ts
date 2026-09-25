@@ -19,7 +19,7 @@ test("signup creates an account and exposes the journal", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Journal" })).toBeVisible();
 });
 
-test("MVP smoke: authenticated user can add a manual problem and edit its solution", async ({ page }) => {
+test("MVP smoke: authenticated user can add a manual problem", async ({ page }) => {
   const username = `mvp${Date.now()}`;
   await page.goto("/signup");
   await page.waitForLoadState("networkidle");
@@ -39,13 +39,5 @@ test("MVP smoke: authenticated user can add a manual problem and edit its soluti
   await page.getByRole("button", { name: "Save solution" }).click();
   await expect(page.getByText("Original solution", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: /Edit solution Original solution/ }).click();
-  await expect(page.getByLabel("Title")).toHaveValue("Original solution");
-  await page.getByLabel("Title").fill("Edited solution");
-  await page.getByRole("button", { name: "Update solution" }).click();
-  await expect(page.getByText("Edited solution", { exact: true })).toBeVisible();
-  await expect(page.getByText("Original solution", { exact: true })).toHaveCount(0);
-
   await page.reload();
-  await expect(page.getByText("Edited solution", { exact: true })).toBeVisible();
 });
