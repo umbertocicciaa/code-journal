@@ -29,9 +29,4 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Run CI
-        run: |
-          set -a
-          source .env.ci
-          set +a
-          npm run ci:all
+      - run: npm run ci:all
