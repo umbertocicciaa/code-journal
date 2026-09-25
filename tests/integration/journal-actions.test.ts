@@ -1,77 +1,103 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { eq } from "drizzle-orm";
+import { solution } from "@/server/db/schema";
+import { db } from "@/server/db/client";
+import { createSolution } from "@/server/repositories/user-problems";
+import { updateSolutionAction } from "@/server/actions/journal-actions";
+import { createTestUser, seedJournalEntry } from "./helpers";
 
-const { requireSession, updateSolution } = vi.hoisted(() => ({
+const { requireSession } = vi.hoisted(() => ({
   requireSession: vi.fn(),
-  updateSolution: vi.fn(),
 }));
 
 vi.mock("@/server/session", () => ({ requireSession }));
-vi.mock("@/server/repositories/user-problems", () => ({
-  createUserProblem: vi.fn(),
-  createSolution: vi.fn(),
-  deleteSolution: vi.fn(),
-  deleteUserProblem: vi.fn(),
-  findUserProblemById: vi.fn(),
-  setUserProblemTags: vi.fn(),
-  updateSolution,
-  updateUserProblem: vi.fn(),
-}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-
-import { updateSolutionAction } from "@/server/actions/journal-actions";
 
 describe("journal solution actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("updates a solution for the authenticated owner", async () => {
-    requireSession.mockResolvedValue({ user: { id: "owner-1" } });
-    updateSolution.mockResolvedValue({
-      id: "solution-1",
-      userProblemId: "entry-1",
-      title: "Updated",
-      language: "rust",
-      bodyMd: "fn main() {}",
+  it("updates and persists a solution for the authenticated owner", async () => {
+    const user = await createTestUser();
+    const { entry } = await seedJournalEntry({ userId: user.id });
+    const created = await createSolution({
+      userProblemId: entry.id,
+      title: "Original",
+      language: "python",
+      bodyMd: "print('before')",
     });
 
-    const result = await updateSolutionAction("solution-1", {
+    expect(created).not.toBeNull();
+    requireSession.mockResolvedValue({ user: { id: user.id } });
+
+    const result = await updateSolutionAction(created!.id, {
       title: "Updated",
       language: "rust",
       bodyMd: "fn main() {}",
     });
 
     expect(result).toEqual({ success: true });
-    expect(updateSolution).toHaveBeenCalledWith("owner-1", "solution-1", {
+
+    const persisted = await db.query.solution.findFirst({
+      where: eq(solution.id, created!.id),
+    });
+    expect(persisted).toMatchObject({
+      id: created!.id,
+      userProblemId: entry.id,
       title: "Updated",
       language: "rust",
       bodyMd: "fn main() {}",
     });
   });
 
-  it("rejects invalid solution payloads before touching the repository", async () => {
-    requireSession.mockResolvedValue({ user: { id: "owner-1" } });
+  it("rejects invalid solution payloads before touching the database", async () => {
+    const user = await createTestUser();
+    requireSession.mockResolvedValue({ user: { id: user.id } });
 
-    const result = await updateSolutionAction("solution-1", {
+    const result = await updateSolutionAction("missing-solution", {
       title: "",
       language: "not-a-language",
       bodyMd: "",
     });
 
     expect(result).toEqual({ success: false, error: "Invalid solution" });
-    expect(updateSolution).not.toHaveBeenCalled();
+
+    const persisted = await db.query.solution.findFirst({
+      where: eq(solution.id, "missing-solution"),
+    });
+    expect(persisted).toBeUndefined();
   });
 
-  it("reports missing solutions without exposing ownership details", async () => {
-    requireSession.mockResolvedValue({ user: { id: "owner-1" } });
-    updateSolution.mockResolvedValue(null);
+  it("does not allow a different user to update the solution", async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const { entry } = await seedJournalEntry({ userId: owner.id });
+    const created = await createSolution({
+      userProblemId: entry.id,
+      title: "Private",
+      language: "cpp",
+      bodyMd: "class Solution {};",
+    });
 
-    const result = await updateSolutionAction("missing", {
-      title: "Updated",
-      language: "python",
-      bodyMd: "print('ok')",
+    expect(created).not.toBeNull();
+    requireSession.mockResolvedValue({ user: { id: other.id } });
+
+    const result = await updateSolutionAction(created!.id, {
+      title: "Hacked",
+      language: "rust",
+      bodyMd: "fn main() {}",
     });
 
     expect(result).toEqual({ success: false, error: "Solution not found" });
+
+    const persisted = await db.query.solution.findFirst({
+      where: eq(solution.id, created!.id),
+    });
+    expect(persisted).toMatchObject({
+      title: "Private",
+      language: "cpp",
+      bodyMd: "class Solution {};",
+    });
   });
 });
