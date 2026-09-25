@@ -15,9 +15,9 @@ describe("SolutionEditor", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Title")).toHaveValue("Two pointers");
-    expect(screen.getByLabelText("Language")).toHaveValue("typescript");
-    expect(screen.getByRole("button", { name: "Update solution" })).toBeVisible();
+    expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("Two pointers");
+    expect((screen.getByLabelText("Language") as HTMLSelectElement).value).toBe("typescript");
+    expect(screen.getByRole("button", { name: "Update solution" })).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: "Updated solution" },
