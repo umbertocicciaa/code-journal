@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --import tsx src/server/db/migrate.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "ci": "npm run db:generate && npm run db:migrate && npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run build"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
