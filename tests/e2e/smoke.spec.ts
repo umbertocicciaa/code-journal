@@ -7,6 +7,23 @@ test("home redirects to login when logged out", async ({ page }) => {
 });
 
 test("signup creates an account and exposes the journal", async ({ page }) => {
+  page.on("pageerror", (error) => {
+    console.error("PAGE ERROR:", error.message);
+    console.error(error.stack);
+  });
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      console.error("BROWSER CONSOLE ERROR:", message.text());
+    }
+  });
+  page.on("requestfailed", (request) => {
+    console.error(
+      "REQUEST FAILED:",
+      request.url(),
+      request.failure()?.errorText,
+    );
+  });
+
   const username = `user${Date.now()}`;
   await page.goto("/signup");
   await page.waitForLoadState("networkidle");
@@ -20,6 +37,23 @@ test("signup creates an account and exposes the journal", async ({ page }) => {
 });
 
 test("MVP smoke: authenticated user can add a manual problem and edit its solution", async ({ page }) => {
+  page.on("pageerror", (error) => {
+    console.error("PAGE ERROR:", error.message);
+    console.error(error.stack);
+  });
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      console.error("BROWSER CONSOLE ERROR:", message.text());
+    }
+  });
+  page.on("requestfailed", (request) => {
+    console.error(
+      "REQUEST FAILED:",
+      request.url(),
+      request.failure()?.errorText,
+    );
+  });
+
   const username = `mvp${Date.now()}`;
   await page.goto("/signup");
   await page.waitForLoadState("networkidle");
