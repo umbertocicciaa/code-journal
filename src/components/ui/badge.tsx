@@ -10,9 +10,9 @@ const badgeVariants = cva(
         outline: "border-line bg-transparent text-muted",
         accent: "border-transparent bg-accent text-white",
         ink: "border-transparent bg-ink text-ink-foreground",
-        easy: "border-transparent bg-brand-soft text-[#6b5a00]",
-        medium: "border-transparent bg-accent-soft text-[#c2410c]",
-        hard: "border-transparent bg-ink text-ink-foreground",
+        easy: "border-transparent bg-difficulty-easy text-difficulty-easy-foreground",
+        medium: "border-transparent bg-difficulty-medium text-difficulty-medium-foreground",
+        hard: "border-transparent bg-difficulty-hard text-difficulty-hard-foreground",
       },
     },
     defaultVariants: {
@@ -28,6 +28,7 @@ export function Badge({
 }: React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof badgeVariants>) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
+
 
 export function difficultyBadgeVariant(
   difficulty: "EASY" | "MEDIUM" | "HARD",

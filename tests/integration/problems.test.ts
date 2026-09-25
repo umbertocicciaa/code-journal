@@ -72,3 +72,25 @@ describe("problem repository", () => {
     expect(companies.some((company) => company.slug === "amazon")).toBe(true);
   });
 });
+
+
+
+describe("difficulty persistence", () => {
+  it.each(["EASY", "MEDIUM", "HARD"] as const)(
+    "persists %s problems without changing difficulty",
+    async (difficulty) => {
+      const slug = uniqueSlug(`difficulty-${difficulty.toLowerCase()}`);
+      await createProblem({
+        slug,
+        title: `Difficulty ${difficulty}`,
+        difficulty,
+        descriptionMd: "",
+        url: `https://leetcode.com/problems/${slug}/`,
+        source: "manual",
+      });
+
+      const problem = await findProblemBySlug(slug);
+      expect(problem?.difficulty).toBe(difficulty);
+    },
+  );
+});
