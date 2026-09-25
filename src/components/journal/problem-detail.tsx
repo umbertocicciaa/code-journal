@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ExternalLink, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import {
+  DEFAULT_SOLUTION_LANGUAGE,
+  isSolutionLanguage,
+} from "@/lib/solution-languages";
 import { CodeBlock } from "@/components/code/code-block";
 import { SolutionEditor, type SolutionDraft } from "@/components/code/solution-editor";
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
@@ -277,7 +281,9 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
                 <SolutionEditor
                   initial={{
                     title: solution.title,
-                    language: solution.language,
+                    language: isSolutionLanguage(solution.language)
+                      ? solution.language
+                      : DEFAULT_SOLUTION_LANGUAGE,
                     code: solution.bodyMd,
                   }}
                   onSubmit={editSolution}
