@@ -22,8 +22,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getLeitnerBoxLabel } from "@/lib/leitner";
 import { difficultyColors } from "@/components/ui/difficulty-colors";
+import { getLeitnerBoxLabel } from "@/lib/leitner";
 
 const palette = {
   accent: "#ff6b3b",
