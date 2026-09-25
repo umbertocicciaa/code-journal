@@ -26,10 +26,28 @@ process.on("exit", cleanup);
 process.on("SIGINT", () => process.exit(130));
 process.on("SIGTERM", () => process.exit(143));
 
-const result = spawnSync("npm", ["run", "ci"], {
-  stdio: "inherit",
-  env: { ...process.env },
-  shell: process.platform === "win32",
-});
+const run = (command, args) => {
+  const result = spawnSync(command, args, {
+    stdio: "inherit",
+    env: { ...process.env },
+    shell: process.platform === "win32",
+  });
 
-process.exit(result.status ?? 1);
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+};
+
+// Build is a prerequisite for the production server used by the smoke suite.
+run("npm", ["run", "db:generate"]);
+run("npm", ["run", "db:migrate"]);
+run("npm", ["run", "build"]);
+
+// Smoke tests run first so the critical user journey fails fast before
+// slower unit/integration checks.
+run("npm", ["run", "test:e2e"]);
+
+run("npm", ["run", "lint"]);
+run("npm", ["run", "typecheck"]);
+run("npm", ["run", "test"]);
+run("npm", ["run", "test:integration"]);
