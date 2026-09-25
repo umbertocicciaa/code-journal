@@ -43,6 +43,14 @@ run("npm", ["run", "db:generate"]);
 run("npm", ["run", "db:migrate"]);
 run("npm", ["run", "build"]);
 
+// Install the browser required by the smoke suite. CI runners do not ship with
+// Playwright browsers preinstalled; Linux also needs the browser system packages.
+const playwrightInstallArgs =
+  process.platform === "linux"
+    ? ["playwright", "install", "--with-deps", "chromium"]
+    : ["playwright", "install", "chromium"];
+run("npx", playwrightInstallArgs);
+
 // Smoke tests run first so the critical user journey fails fast before
 // slower unit/integration checks.
 run("npm", ["run", "test:e2e"]);
