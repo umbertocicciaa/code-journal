@@ -230,6 +230,18 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
             >
               {isSolved ? "Mark attempting" : "Mark solved"}
             </Button>
+
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setEditingDescription(true)}
+              disabled={isPending}
+            >
+              <Pencil className="h-4 w-4" />
+              {hasDescription ? "Edit description" : "Add description"}
+            </Button>
+
             <Button
               variant="destructive"
               size="icon"
@@ -251,37 +263,13 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
               pending={isPending}
             />
           ) : hasDescription ? (
-            <div className="space-y-4">
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setEditingDescription(true)}
-                  disabled={isPending}
-                >
-                  <Pencil className="h-4 w-4" />
-                  Edit description
-                </Button>
-              </div>
-              <MarkdownViewer content={entry.problem.descriptionMd} />
-            </div>
+            <MarkdownViewer content={entry.problem.descriptionMd} />
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-muted">
                 Description unavailable. Use Refresh to fetch it from LeetCode, or
                 add one manually.
               </p>
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={() => setEditingDescription(true)}
-                disabled={isPending}
-              >
-                <Pencil className="h-4 w-4" />
-                Add description
-              </Button>
             </div>
           )}
           {entry.problem.problemCompanies.length > 0 ? (
