@@ -51,6 +51,10 @@ export const updateUserProblemSchema = z.object({
   tagIds: z.array(z.string()).optional(),
 });
 
+export const updateProblemDescriptionSchema = z.object({
+  descriptionMd: z.string().max(100_000),
+});
+
 export const solutionSchema = z.object({
   title: z.string().min(1).max(120),
   language: z.enum(SOLUTION_LANGUAGE_IDS),
