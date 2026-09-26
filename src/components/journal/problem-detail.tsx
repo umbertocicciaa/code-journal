@@ -32,12 +32,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { findUserProblemById } from "@/server/repositories/user-problems";
+import { ProblemDescriptionEditor } from "@/components/journal/problem-description-editor";
 import {
   createSolutionAction,
   deleteSolutionAction,
   updateSolutionAction,
   deleteUserProblemAction,
   refreshProblemFromLeetcodeAction,
+  updateProblemDescriptionAction,
   updateUserProblemAction,
 } from "@/server/actions/journal-actions";
 
@@ -84,7 +86,23 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
     });
   }
 
+  const [editingDescription, setEditingDescription] = useState(false);
   const [editingSolutionId, setEditingSolutionId] = useState<string | null>(null);
+
+  function saveDescription(descriptionMd: string) {
+    startTransition(async () => {
+      const result = await updateProblemDescriptionAction(entry.id, {
+        descriptionMd,
+      });
+      if (!result.success) {
+        feedback.showError("Unable to update description", result.error);
+        return;
+      }
+      feedback.showSuccess("Description saved", "The problem description was updated.");
+      setEditingDescription(false);
+      router.refresh();
+    });
+  }
 
   function addSolution(draft: SolutionDraft) {
     startTransition(async () => {
@@ -225,13 +243,46 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {hasDescription ? (
-            <MarkdownViewer content={entry.problem.descriptionMd} />
+          {editingDescription ? (
+            <ProblemDescriptionEditor
+              initial={entry.problem.descriptionMd}
+              onSubmit={saveDescription}
+              onCancel={() => setEditingDescription(false)}
+              pending={isPending}
+            />
+          ) : hasDescription ? (
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setEditingDescription(true)}
+                  disabled={isPending}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit description
+                </Button>
+              </div>
+              <MarkdownViewer content={entry.problem.descriptionMd} />
+            </div>
           ) : (
-            <p className="text-sm text-muted">
-              Description unavailable. Use Refresh to fetch it from LeetCode, or
-              edit the shared problem manually.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted">
+                Description unavailable. Use Refresh to fetch it from LeetCode, or
+                add one manually.
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => setEditingDescription(true)}
+                disabled={isPending}
+              >
+                <Pencil className="h-4 w-4" />
+                Add description
+              </Button>
+            </div>
           )}
           {entry.problem.problemCompanies.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">

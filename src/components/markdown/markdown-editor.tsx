@@ -6,10 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 export function MarkdownEditor({
+  id,
   name,
   defaultValue = "",
   placeholder,
 }: {
+  id?: string;
   name: string;
   defaultValue?: string;
   placeholder?: string;
@@ -22,8 +24,9 @@ export function MarkdownEditor({
         <TabsTrigger value="write">Write</TabsTrigger>
         <TabsTrigger value="preview">Preview</TabsTrigger>
       </TabsList>
-      <TabsContent value="write">
+      <TabsContent value="write" forceMount className="data-[state=inactive]:hidden mt-4">
         <Textarea
+          id={id}
           name={name}
           value={value}
           onChange={(event) => setValue(event.target.value)}

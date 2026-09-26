@@ -33,6 +33,7 @@ import {
   addProblemByUrlSchema,
   manualProblemSchema,
   solutionSchema,
+  updateProblemDescriptionSchema,
   updateUserProblemSchema,
 } from "@/server/validation";
 
@@ -260,6 +261,40 @@ export async function refreshProblemFromLeetcodeAction(problemId: string) {
         ? error.message
         : "Failed to refresh from LeetCode";
     return actionError(message);
+  }
+}
+
+export async function updateProblemDescriptionAction(
+  userProblemId: string,
+  input: unknown,
+): Promise<ActionResult> {
+  try {
+    const session = await requireSession();
+    const parsed = updateProblemDescriptionSchema.safeParse(input);
+    if (!parsed.success) {
+      return actionError("Invalid description");
+    }
+
+    const existing = await findUserProblemById(session.user.id, userProblemId);
+    if (!existing) {
+      return actionError("Problem not found");
+    }
+
+    const updated = await updateProblem(existing.problem.id, {
+      descriptionMd: parsed.data.descriptionMd,
+      updatedBy: session.user.id,
+    });
+
+    if (!updated) {
+      return actionError("Unable to update this description.");
+    }
+
+    revalidatePath("/journal");
+    revalidatePath(`/journal/${userProblemId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("updateProblemDescriptionAction failed:", error);
+    return actionError("Unable to update this description.");
   }
 }
 
