@@ -14,12 +14,12 @@ export function normalizeLeetcodeDifficulty(value: string): Difficulty {
   }
 }
 
-export function parseTopicsInput(
+function parseCommaSeparatedNames(
   input: string,
 ): Array<{ slug: string; name: string }> {
   return input
     .split(",")
-    .map((topic) => topic.trim())
+    .map((item) => item.trim())
     .filter(Boolean)
     .map((name) => ({
       name,
@@ -28,4 +28,16 @@ export function parseTopicsInput(
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, ""),
     }));
+}
+
+export function parseTopicsInput(
+  input: string,
+): Array<{ slug: string; name: string }> {
+  return parseCommaSeparatedNames(input);
+}
+
+export function parseCompaniesInput(
+  input: string,
+): Array<{ slug: string; name: string }> {
+  return parseCommaSeparatedNames(input);
 }

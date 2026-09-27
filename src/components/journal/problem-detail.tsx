@@ -33,12 +33,14 @@ import {
 } from "@/components/ui/dialog";
 import type { findUserProblemById } from "@/server/repositories/user-problems";
 import { ProblemDescriptionEditor } from "@/components/journal/problem-description-editor";
+import { ProblemCompaniesEditor } from "@/components/journal/problem-companies-editor";
 import {
   createSolutionAction,
   deleteSolutionAction,
   updateSolutionAction,
   deleteUserProblemAction,
   refreshProblemFromLeetcodeAction,
+  updateProblemCompaniesAction,
   updateProblemDescriptionAction,
   updateUserProblemAction,
 } from "@/server/actions/journal-actions";
@@ -87,6 +89,7 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
   }
 
   const [editingDescription, setEditingDescription] = useState(false);
+  const [editingCompanies, setEditingCompanies] = useState(false);
   const [editingSolutionId, setEditingSolutionId] = useState<string | null>(null);
 
   function saveDescription(descriptionMd: string) {
@@ -100,6 +103,23 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
       }
       feedback.showSuccess("Description saved", "The problem description was updated.");
       setEditingDescription(false);
+      router.refresh();
+    });
+  }
+
+  const companiesInitial = entry.problem.problemCompanies
+    .map((link) => link.company.name)
+    .join(", ");
+
+  function saveCompanies(companies: Array<{ slug: string; name: string }>) {
+    startTransition(async () => {
+      const result = await updateProblemCompaniesAction(entry.id, { companies });
+      if (!result.success) {
+        feedback.showError("Unable to update companies", result.error);
+        return;
+      }
+      feedback.showSuccess("Companies saved", "Company tags were updated.");
+      setEditingCompanies(false);
       router.refresh();
     });
   }
@@ -244,6 +264,17 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
             </Button>
 
             <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setEditingCompanies(true)}
+              disabled={isPending}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit company
+            </Button>
+
+            <Button
               variant="destructive"
               size="icon"
               className="h-9 w-9"
@@ -273,7 +304,16 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
               </p>
             </div>
           )}
-          {entry.problem.problemCompanies.length > 0 ? (
+          {editingCompanies ? (
+            <div className="mt-5 border-t border-line pt-4">
+              <ProblemCompaniesEditor
+                initial={companiesInitial}
+                onSubmit={saveCompanies}
+                onCancel={() => setEditingCompanies(false)}
+                pending={isPending}
+              />
+            </div>
+          ) : entry.problem.problemCompanies.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
               {entry.problem.problemCompanies.map((company) => (
                 <Badge key={company.companyId} variant="outline">

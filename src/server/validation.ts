@@ -55,6 +55,16 @@ export const updateProblemDescriptionSchema = z.object({
   descriptionMd: z.string().max(100_000),
 });
 
+const problemCompanySchema = z.object({
+  slug: z.string().min(1).max(120),
+  name: z.string().min(1).max(200),
+  frequency: z.number().int().optional(),
+});
+
+export const updateProblemCompaniesSchema = z.object({
+  companies: z.array(problemCompanySchema).max(100),
+});
+
 export const solutionSchema = z.object({
   title: z.string().min(1).max(120),
   language: z.enum(SOLUTION_LANGUAGE_IDS),
