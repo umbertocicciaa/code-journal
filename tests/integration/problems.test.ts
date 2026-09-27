@@ -50,6 +50,34 @@ describe("problem repository", () => {
     expect(updated?.difficulty).toBe("HARD");
   });
 
+  it("replaces company relations when companies are updated", async () => {
+    const slug = uniqueSlug("update-companies");
+    const created = await createProblem({
+      slug,
+      title: "Company Problem",
+      difficulty: "EASY",
+      descriptionMd: "",
+      url: `https://leetcode.com/problems/${slug}/`,
+      source: "manual",
+      companies: [{ slug: "google", name: "Google" }],
+    });
+
+    expect(created?.problemCompanies).toHaveLength(1);
+
+    const updated = await updateProblem(created!.id, {
+      companies: [
+        { slug: "meta", name: "Meta" },
+        { slug: "amazon", name: "Amazon" },
+      ],
+    });
+
+    expect(updated?.problemCompanies).toHaveLength(2);
+    expect(updated?.problemCompanies.map((link) => link.company.slug).sort()).toEqual([
+      "amazon",
+      "meta",
+    ]);
+  });
+
   it("searches topics and companies", async () => {
     const slug = uniqueSlug("search-problem");
     await createProblem({

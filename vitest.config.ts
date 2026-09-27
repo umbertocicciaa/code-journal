@@ -7,9 +7,11 @@ export default defineConfig({
     include: [
       "tests/unit/**/*.test.ts",
       "tests/unit/problem-description-editor.test.tsx",
+      "tests/unit/problem-companies-editor.test.tsx",
     ],
     environmentMatchGlobs: [
       ["tests/unit/problem-description-editor.test.tsx", "jsdom"],
+      ["tests/unit/problem-companies-editor.test.tsx", "jsdom"],
     ],
     setupFiles: ["tests/setup.ts"],
   },

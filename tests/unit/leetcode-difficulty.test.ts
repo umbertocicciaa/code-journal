@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   normalizeLeetcodeDifficulty,
+  parseCompaniesInput,
   parseTopicsInput,
 } from "@/lib/leetcode-difficulty";
 
@@ -15,6 +16,13 @@ describe("leetcode difficulty", () => {
     expect(parseTopicsInput("Array, Hash Table")).toEqual([
       { name: "Array", slug: "array" },
       { name: "Hash Table", slug: "hash-table" },
+    ]);
+  });
+
+  it("parses company input", () => {
+    expect(parseCompaniesInput("Google, Amazon Web Services")).toEqual([
+      { name: "Google", slug: "google" },
+      { name: "Amazon Web Services", slug: "amazon-web-services" },
     ]);
   });
 });

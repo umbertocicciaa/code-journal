@@ -162,6 +162,14 @@ export function AddProblemForm() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="companiesText">Companies</Label>
+                <Input
+                  id="companiesText"
+                  name="companiesText"
+                  placeholder="Google, Amazon, Meta"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="descriptionMd">Description (Markdown)</Label>
                 <Textarea
                   id="descriptionMd"

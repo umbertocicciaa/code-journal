@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { parseTopicsInput } from "@/lib/leetcode-difficulty";
+import { parseCompaniesInput, parseTopicsInput } from "@/lib/leetcode-difficulty";
 import { slugify } from "@/lib/utils";
 import { initializeLeitnerOnSolve } from "@/lib/leitner";
 import { parseLeetcodeUrl, buildLeetcodeUrl } from "@/lib/leetcode-url";
@@ -33,6 +33,7 @@ import {
   addProblemByUrlSchema,
   manualProblemSchema,
   solutionSchema,
+  updateProblemCompaniesSchema,
   updateProblemDescriptionSchema,
   updateUserProblemSchema,
 } from "@/server/validation";
@@ -167,6 +168,7 @@ export async function addManualProblemAction(
     const session = await requireSession();
 
     const topicsText = String(formData.get("topicsText") ?? "").trim();
+    const companiesText = String(formData.get("companiesText") ?? "").trim();
     const topicsRaw = formData.get("topics");
     const companiesRaw = formData.get("companies");
     let topics: Array<{ slug: string; name: string }> = [];
@@ -182,7 +184,11 @@ export async function addManualProblemAction(
           topics = parsedTopics;
         }
       }
-      companies = companiesRaw ? JSON.parse(String(companiesRaw)) : [];
+      if (companiesText) {
+        companies = parseCompaniesInput(companiesText);
+      } else if (companiesRaw) {
+        companies = JSON.parse(String(companiesRaw));
+      }
     } catch {
       return actionError("Invalid topics or companies format");
     }
@@ -261,6 +267,40 @@ export async function refreshProblemFromLeetcodeAction(problemId: string) {
         ? error.message
         : "Failed to refresh from LeetCode";
     return actionError(message);
+  }
+}
+
+export async function updateProblemCompaniesAction(
+  userProblemId: string,
+  input: unknown,
+): Promise<ActionResult> {
+  try {
+    const session = await requireSession();
+    const parsed = updateProblemCompaniesSchema.safeParse(input);
+    if (!parsed.success) {
+      return actionError("Invalid companies");
+    }
+
+    const existing = await findUserProblemById(session.user.id, userProblemId);
+    if (!existing) {
+      return actionError("Problem not found");
+    }
+
+    const updated = await updateProblem(existing.problem.id, {
+      companies: parsed.data.companies,
+      updatedBy: session.user.id,
+    });
+
+    if (!updated) {
+      return actionError("Unable to update companies.");
+    }
+
+    revalidatePath("/journal");
+    revalidatePath(`/journal/${userProblemId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("updateProblemCompaniesAction failed:", error);
+    return actionError("Unable to update companies.");
   }
 }
 
