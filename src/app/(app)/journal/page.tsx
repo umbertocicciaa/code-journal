@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge, difficultyBadgeVariant } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  listJournalCompanies,
+  listJournalTopics,
   listUserProblems,
   listUserTags,
 } from "@/server/repositories/user-problems";
@@ -26,11 +28,16 @@ export default async function JournalPage({
       typeof params.difficulty === "string" ? params.difficulty : undefined,
     status: typeof params.status === "string" ? params.status : undefined,
     tagId: typeof params.tagId === "string" ? params.tagId : undefined,
+    topicId: typeof params.topicId === "string" ? params.topicId : undefined,
+    companyId:
+      typeof params.companyId === "string" ? params.companyId : undefined,
   });
 
-  const [entries, tags] = await Promise.all([
+  const [entries, tags, topics, companies] = await Promise.all([
     listUserProblems(session.user.id, filters),
     listUserTags(session.user.id),
+    listJournalTopics(session.user.id),
+    listJournalCompanies(session.user.id),
   ]);
 
   const solvedCount = entries.filter((entry) => entry.status === "solved").length;
@@ -45,7 +52,7 @@ export default async function JournalPage({
       <AddProblemForm />
 
       <Suspense fallback={null}>
-        <JournalFilters tags={tags} />
+        <JournalFilters tags={tags} topics={topics} companies={companies} />
       </Suspense>
 
       <div className="grid gap-3">

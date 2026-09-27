@@ -19,6 +19,8 @@ export interface UserProblemFilters {
   difficulty?: Difficulty;
   status?: UserProblemStatus;
   tagId?: string;
+  topicId?: string;
+  companyId?: string;
   leitnerBox?: number;
 }
 
@@ -105,6 +107,22 @@ export async function listUserProblems(
         (tag) => tag.userTagId === filters.tagId,
       );
       if (!hasTag) {
+        return false;
+      }
+    }
+    if (filters.topicId) {
+      const hasTopic = row.problem.problemTopics.some(
+        (link) => link.topicId === filters.topicId,
+      );
+      if (!hasTopic) {
+        return false;
+      }
+    }
+    if (filters.companyId) {
+      const hasCompany = row.problem.problemCompanies.some(
+        (link) => link.companyId === filters.companyId,
+      );
+      if (!hasCompany) {
         return false;
       }
     }
@@ -294,6 +312,30 @@ export async function listUserTags(userId: string) {
     where: eq(userTag.userId, userId),
     orderBy: [asc(userTag.name)],
   });
+}
+
+export async function listJournalTopics(userId: string) {
+  const rows = await db.execute<{ id: string; name: string }>(sql`
+    select distinct t.id as id, t.name as name
+    from user_problem up
+    inner join problem_topic pt on pt.problem_id = up.problem_id
+    inner join topic t on t.id = pt.topic_id
+    where up.user_id = ${userId}
+    order by t.name
+  `);
+  return rows;
+}
+
+export async function listJournalCompanies(userId: string) {
+  const rows = await db.execute<{ id: string; name: string }>(sql`
+    select distinct c.id as id, c.name as name
+    from user_problem up
+    inner join problem_company pc on pc.problem_id = up.problem_id
+    inner join company c on c.id = pc.company_id
+    where up.user_id = ${userId}
+    order by c.name
+  `);
+  return rows;
 }
 
 export async function createUserTag(input: {
