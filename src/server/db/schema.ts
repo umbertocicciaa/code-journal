@@ -12,7 +12,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const difficultyEnum = pgEnum("difficulty", ["EASY", "MEDIUM", "HARD"]);
-export const problemSourceEnum = pgEnum("problem_source", ["leetcode", "manual"]);
+export const problemSourceEnum = pgEnum("problem_source", [
+  "leetcode",
+  "neetcode",
+  "manual",
+]);
 export const userProblemStatusEnum = pgEnum("user_problem_status", [
   "attempting",
   "solved",
@@ -307,12 +311,29 @@ export const leetcodeCredential = pgTable(
   (table) => [uniqueIndex("leetcode_credential_user_idx").on(table.userId)],
 );
 
+export const neetcodeCredential = pgTable(
+  "neetcode_credential",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    refreshTokenEnc: text("refresh_token_enc").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("neetcode_credential_user_idx").on(table.userId)],
+);
+
 export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
   userProblems: many(userProblem),
   userTags: many(userTag),
   leetcodeCredential: one(leetcodeCredential),
+  neetcodeCredential: one(neetcodeCredential),
 }));
 
 export const problemRelations = relations(problem, ({ many }) => ({

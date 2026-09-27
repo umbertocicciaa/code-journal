@@ -2,14 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { verifyLeetcodeCredentials } from "@/server/services/leetcode";
+import { verifyNeetcodeCredentials } from "@/server/services/neetcode";
 import {
   deleteLeetcodeCredentials,
   saveLeetcodeCredentials,
 } from "@/server/repositories/leetcode-credentials";
+import {
+  deleteNeetcodeCredentials,
+  saveNeetcodeCredentials,
+} from "@/server/repositories/neetcode-credentials";
 import { updateUserSettings } from "@/server/repositories/users";
 import { requireSession } from "@/server/session";
 import {
   leetcodeCredentialSchema,
+  neetcodeCredentialSchema,
   updateSettingsSchema,
   userTagSchema,
 } from "@/server/validation";
@@ -79,6 +85,49 @@ export async function deleteLeetcodeCredentialAction() {
     return {
       success: false,
       error: "Unable to remove LeetCode credentials.",
+    } as const;
+  }
+}
+
+export async function saveNeetcodeCredentialAction(input: unknown) {
+  try {
+    const session = await requireSession();
+    const parsed = neetcodeCredentialSchema.safeParse(input);
+    if (!parsed.success) {
+      return { success: false, error: "Invalid credentials" } as const;
+    }
+
+    const verified = await verifyNeetcodeCredentials(parsed.data.refreshToken);
+    if (!verified) {
+      return {
+        success: false,
+        error: "Could not verify NeetCode session. Check your refresh token.",
+      } as const;
+    }
+
+    await saveNeetcodeCredentials(session.user.id, parsed.data, true);
+    revalidatePath("/settings");
+    return { success: true } as const;
+  } catch (error) {
+    console.error("saveNeetcodeCredentialAction failed:", error);
+    return {
+      success: false,
+      error: "Unable to save NeetCode credentials.",
+    } as const;
+  }
+}
+
+export async function deleteNeetcodeCredentialAction() {
+  try {
+    const session = await requireSession();
+    await deleteNeetcodeCredentials(session.user.id);
+    revalidatePath("/settings");
+    return { success: true } as const;
+  } catch (error) {
+    console.error("deleteNeetcodeCredentialAction failed:", error);
+    return {
+      success: false,
+      error: "Unable to remove NeetCode credentials.",
     } as const;
   }
 }

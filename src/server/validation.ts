@@ -84,6 +84,10 @@ export const leetcodeCredentialSchema = z.object({
   csrf: z.string().min(10),
 });
 
+export const neetcodeCredentialSchema = z.object({
+  refreshToken: z.string().min(20),
+});
+
 export const updateSettingsSchema = z.object({
   statsPublic: z.boolean().optional(),
   name: z.string().min(2).max(80).optional(),
@@ -114,7 +118,7 @@ const exportedProblemSchema = z.object({
   title: z.string().min(1).max(200),
   difficulty: difficultySchema,
   url: z.string().url(),
-  source: z.enum(["leetcode", "manual"]).default("leetcode"),
+  source: z.enum(["leetcode", "neetcode", "manual"]).default("leetcode"),
   leetcodeFrontendId: z.string().max(20).nullable().default(null),
   isPaidOnly: z.boolean().default(false),
   descriptionMd: z.string().max(200_000).default(""),
