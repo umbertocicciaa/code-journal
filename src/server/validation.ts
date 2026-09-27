@@ -94,6 +94,8 @@ export const journalFiltersSchema = z.object({
   difficulty: difficultySchema.optional(),
   status: userProblemStatusSchema.optional(),
   tagId: z.string().optional(),
+  topicId: z.string().optional(),
+  companyId: z.string().optional(),
 });
 
 export const activityDateSchema = z.object({
