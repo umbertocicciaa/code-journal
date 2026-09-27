@@ -8,6 +8,13 @@
       "when": 1789834256414,
       "tag": "0000_minor_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790522465551,
+      "tag": "0001_fat_firebird",
+      "breakpoints": true
     }
   ]
 }

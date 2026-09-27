@@ -76,16 +76,16 @@ export function AddProblemForm() {
     <div className="space-y-4">
       <Card tone="ink">
         <CardHeader>
-          <CardTitle>Add from LeetCode URL</CardTitle>
+          <CardTitle>Add from URL</CardTitle>
           <CardDescription className="text-white/60">
-            Paste a problem link; title, difficulty, topics and description are fetched for you.
+            Paste a LeetCode or NeetCode problem link; title, difficulty, topics, and description are fetched for you.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={urlAction} className="flex flex-col gap-3 md:flex-row">
             <Input
               name="url"
-              placeholder="https://leetcode.com/problems/two-sum/"
+              placeholder="https://leetcode.com/problems/two-sum/ or https://neetcode.io/problems/two-integer-sum/"
               required
               className="border-white/10 bg-white/10 text-white placeholder:text-white/40 focus-visible:border-white/30 focus-visible:ring-white/10"
             />

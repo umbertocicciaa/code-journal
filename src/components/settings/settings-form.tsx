@@ -5,8 +5,10 @@ import { useTransition } from "react";
 import {
   createUserTagAction,
   deleteLeetcodeCredentialAction,
+  deleteNeetcodeCredentialAction,
   deleteUserTagAction,
   saveLeetcodeCredentialAction,
+  saveNeetcodeCredentialAction,
   updateSettingsAction,
 } from "@/server/actions/settings-actions";
 import { useFeedback } from "@/components/feedback/feedback-provider";
@@ -21,7 +23,9 @@ interface SettingsFormProps {
   statsPublic: boolean;
   tags: Array<{ id: string; name: string; color: string }>;
   hasLeetcodeCredential: boolean;
-  lastVerifiedAt: Date | null;
+  leetcodeLastVerifiedAt: Date | null;
+  hasNeetcodeCredential: boolean;
+  neetcodeLastVerifiedAt: Date | null;
 }
 
 export function SettingsForm({
@@ -29,7 +33,9 @@ export function SettingsForm({
   statsPublic,
   tags,
   hasLeetcodeCredential,
-  lastVerifiedAt,
+  leetcodeLastVerifiedAt,
+  hasNeetcodeCredential,
+  neetcodeLastVerifiedAt,
 }: SettingsFormProps) {
   const router = useRouter();
   const feedback = useFeedback();
@@ -100,8 +106,8 @@ export function SettingsForm({
             <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-sm text-[#6b5a00]">
               <span className="h-2 w-2 rounded-full bg-positive" />
               Credential saved
-              {lastVerifiedAt
-                ? ` · verified ${lastVerifiedAt.toLocaleString()}`
+              {leetcodeLastVerifiedAt
+                ? ` · verified ${leetcodeLastVerifiedAt.toLocaleString()}`
                 : ""}
             </p>
           ) : null}
@@ -151,6 +157,79 @@ export function SettingsForm({
                     const result = await deleteLeetcodeCredentialAction();
                     if (!result.success) {
                       feedback.showError("Unable to remove credentials", result.error);
+                      return;
+                    }
+                    router.refresh();
+                  })
+                }
+              >
+                Remove
+              </Button>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>NeetCode Firebase refresh token</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted">
+            Optional. Used server-side to fetch pro-only NeetCode problems and
+            company tags. Stored encrypted with AES-256-GCM. Copy the refresh
+            token from NeetCode&apos;s Firebase local storage after signing in.
+          </p>
+          {hasNeetcodeCredential ? (
+            <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-sm text-[#6b5a00]">
+              <span className="h-2 w-2 rounded-full bg-positive" />
+              Credential saved
+              {neetcodeLastVerifiedAt
+                ? ` · verified ${neetcodeLastVerifiedAt.toLocaleString()}`
+                : ""}
+            </p>
+          ) : null}
+          <div className="space-y-2">
+            <Label htmlFor="neetcode-refresh-token">Refresh token</Label>
+            <Input id="neetcode-refresh-token" name="neetcodeRefreshToken" />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              disabled={isPending}
+              onClick={() =>
+                startTransition(async () => {
+                  const refreshTokenInput = document.getElementById(
+                    "neetcode-refresh-token",
+                  ) as HTMLInputElement;
+                  const result = await saveNeetcodeCredentialAction({
+                    refreshToken: refreshTokenInput.value,
+                  });
+                  if (!result.success) {
+                    feedback.showError("Credential not saved", result.error);
+                    return;
+                  }
+                  feedback.showSuccess(
+                    "Credentials saved",
+                    "NeetCode session verified and stored securely.",
+                  );
+                  router.refresh();
+                })
+              }
+            >
+              Save credentials
+            </Button>
+            {hasNeetcodeCredential ? (
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() =>
+                  startTransition(async () => {
+                    const result = await deleteNeetcodeCredentialAction();
+                    if (!result.success) {
+                      feedback.showError(
+                        "Unable to remove credentials",
+                        result.error,
+                      );
                       return;
                     }
                     router.refresh();

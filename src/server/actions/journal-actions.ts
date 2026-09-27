@@ -4,13 +4,19 @@ import { revalidatePath } from "next/cache";
 import { parseTopicsInput } from "@/lib/leetcode-difficulty";
 import { slugify } from "@/lib/utils";
 import { initializeLeitnerOnSolve } from "@/lib/leitner";
-import { parseLeetcodeUrl, buildLeetcodeUrl } from "@/lib/leetcode-url";
+import { buildLeetcodeUrl, parseProblemUrl, type ParsedProblemUrl } from "@/lib/leetcode-url";
 import {
   fetchLeetcodeQuestion,
   LeetcodeFetchError,
   mapLeetcodeQuestionToProblemFields,
   problemNeedsLeetcodeEnrichment,
 } from "@/server/services/leetcode";
+import {
+  fetchNeetcodeProblemMetadata,
+  mapNeetcodeMetadataToProblemFields,
+  NeetcodeFetchError,
+  problemNeedsNeetcodeEnrichment,
+} from "@/server/services/neetcode";
 import {
   createProblem,
   findProblemById,
@@ -28,6 +34,7 @@ import {
   updateUserProblem,
 } from "@/server/repositories/user-problems";
 import { getLeetcodeCredentials } from "@/server/repositories/leetcode-credentials";
+import { getNeetcodeCredentials } from "@/server/repositories/neetcode-credentials";
 import { requireSession } from "@/server/session";
 import {
   addProblemByUrlSchema,
@@ -58,14 +65,38 @@ async function safeGetLeetcodeCredentials(userId: string) {
   }
 }
 
+async function safeGetNeetcodeCredentials(userId: string) {
+  try {
+    return await getNeetcodeCredentials(userId);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchAndPersistProblem(
-  slug: string,
+  parsed: ParsedProblemUrl,
   userId: string,
   existingProblemId?: string,
 ) {
-  const credentials = await safeGetLeetcodeCredentials(userId);
-  const question = await fetchLeetcodeQuestion(slug, credentials ?? undefined);
-  const mapped = mapLeetcodeQuestionToProblemFields(question);
+  const leetcodeCredentials = await safeGetLeetcodeCredentials(userId);
+  const neetcodeCredentials = await safeGetNeetcodeCredentials(userId);
+
+  const mapped =
+    parsed.source === "leetcode"
+      ? mapLeetcodeQuestionToProblemFields(
+          await fetchLeetcodeQuestion(
+            parsed.slug,
+            leetcodeCredentials ?? undefined,
+          ),
+        )
+      : mapNeetcodeMetadataToProblemFields(
+          await fetchNeetcodeProblemMetadata(
+            parsed.slug,
+            neetcodeCredentials
+              ? { refreshToken: neetcodeCredentials.refreshToken }
+              : undefined,
+          ),
+        );
 
   if (existingProblemId) {
     return updateProblem(existingProblemId, {
@@ -81,6 +112,18 @@ async function fetchAndPersistProblem(
   });
 }
 
+function problemNeedsRemoteEnrichment(problem: {
+  descriptionMd: string;
+  problemTopics: unknown[];
+  source: string;
+  isPaidOnly: boolean;
+}): boolean {
+  return (
+    problemNeedsLeetcodeEnrichment(problem) ||
+    problemNeedsNeetcodeEnrichment(problem)
+  );
+}
+
 export async function addProblemByUrlAction(
   _prev: ActionResult<{ userProblemId: string }>,
   formData: FormData,
@@ -92,44 +135,47 @@ export async function addProblemByUrlAction(
     });
 
     if (!parsed.success) {
-      return actionError("Please enter a valid LeetCode URL");
+      return actionError("Please enter a valid problem URL");
     }
 
-    const slugFromUrl = parseLeetcodeUrl(parsed.data.url);
-    if (!slugFromUrl) {
-      return actionError("URL must be a LeetCode problem link");
+    const parsedUrl = parseProblemUrl(parsed.data.url);
+    if (!parsedUrl) {
+      return actionError("URL must be a LeetCode or NeetCode problem link");
     }
 
-    let problemRecord = await findProblemBySlug(slugFromUrl.slug);
+    let problemRecord = await findProblemBySlug(parsedUrl.slug);
 
     if (!problemRecord) {
       try {
         problemRecord = await fetchAndPersistProblem(
-          slugFromUrl.slug,
+          parsedUrl,
           session.user.id,
         );
       } catch (error) {
         const message =
-          error instanceof LeetcodeFetchError
+          error instanceof LeetcodeFetchError ||
+          error instanceof NeetcodeFetchError
             ? error.message
-            : "Failed to fetch problem from LeetCode";
+            : parsedUrl.source === "neetcode"
+              ? "Failed to fetch problem from NeetCode"
+              : "Failed to fetch problem from LeetCode";
 
         return {
           success: false,
           error: message,
           needsManual: true,
           draft: {
-            slug: slugFromUrl.slug,
-            title: slugFromUrl.slug.replace(/-/g, " "),
+            slug: parsedUrl.slug,
+            title: parsedUrl.slug.replace(/-/g, " "),
             url: parsed.data.url,
             difficulty: "MEDIUM",
           },
         };
       }
-    } else if (problemNeedsLeetcodeEnrichment(problemRecord)) {
+    } else if (problemNeedsRemoteEnrichment(problemRecord)) {
       try {
         problemRecord = await fetchAndPersistProblem(
-          slugFromUrl.slug,
+          parsedUrl,
           session.user.id,
           problemRecord.id,
         );
@@ -243,8 +289,20 @@ export async function refreshProblemFromLeetcodeAction(problemId: string) {
       return actionError("Problem not found");
     }
 
+    if (
+      existingProblem.source !== "leetcode" &&
+      existingProblem.source !== "neetcode"
+    ) {
+      return actionError("Only LeetCode and NeetCode problems can be refreshed");
+    }
+
+    const parsed: ParsedProblemUrl = {
+      source: existingProblem.source,
+      slug: existingProblem.slug,
+    };
+
     const updated = await fetchAndPersistProblem(
-      existingProblem.slug,
+      parsed,
       session.user.id,
       problemId,
     );
@@ -257,9 +315,10 @@ export async function refreshProblemFromLeetcodeAction(problemId: string) {
     return { success: true as const };
   } catch (error) {
     const message =
-      error instanceof LeetcodeFetchError
+      error instanceof LeetcodeFetchError ||
+      error instanceof NeetcodeFetchError
         ? error.message
-        : "Failed to refresh from LeetCode";
+        : "Failed to refresh problem metadata";
     return actionError(message);
   }
 }

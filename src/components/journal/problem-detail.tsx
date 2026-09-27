@@ -161,7 +161,7 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
       }
       feedback.showSuccess(
         "Problem refreshed",
-        "Description, topics, and metadata were updated from LeetCode.",
+        "Description, topics, and metadata were updated from the source site.",
       );
       router.refresh();
     });
@@ -211,7 +211,8 @@ export function ProblemDetail({ entry, tags }: ProblemDetailProps) {
                 Open
               </Link>
             </Button>
-            {entry.problem.source === "leetcode" ? (
+            {entry.problem.source === "leetcode" ||
+            entry.problem.source === "neetcode" ? (
               <Button
                 variant="secondary"
                 size="sm"
