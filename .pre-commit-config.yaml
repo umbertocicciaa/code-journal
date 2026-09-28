@@ -1,0 +1,41 @@
+repos:
+  # General repository hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+
+  # Package-manager-aware ESLint
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: >-
+          bash -c '
+          if [ -f pnpm-lock.yaml ]; then
+            exec pnpm exec eslint "$@";
+          elif [ -f yarn.lock ]; then
+            exec yarn eslint "$@";
+          elif [ -f bun.lockb ] || [ -f bun.lock ]; then
+            exec bunx eslint "$@";
+          else
+            exec npm exec -- eslint "$@";
+          fi
+          ' --
+        language: system
+        files: \.(js|jsx|ts|tsx|mjs|cjs)$
+
+  # TypeScript
+  - repo: local
+    hooks:
+      - id: typecheck
+        name: typecheck
+        entry: npm run typecheck
+        language: system
+        pass_filenames: false
+        files: \.(ts|tsx)$
