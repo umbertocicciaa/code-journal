@@ -112,6 +112,10 @@ export const journalFiltersSchema = z.object({
   companyId: z.string().optional(),
 });
 
+export const userSearchSchema = z.object({
+  q: z.string().trim().min(1).max(80),
+});
+
 export const activityDateSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
 });

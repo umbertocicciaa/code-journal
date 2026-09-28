@@ -8,6 +8,7 @@ import {
   LogOut,
   Repeat,
   Settings,
+  Users,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/server/auth-client";
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/review", label: "Review", icon: Repeat },
   { href: "/kanban", label: "Kanban", icon: Columns3 },
   { href: "/stats", label: "Stats", icon: BarChart3 },
+  { href: "/users", label: "People", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -105,7 +107,7 @@ export function AppShell({
 
         <main className="flex-1 px-1 pb-24 pt-6 md:px-2 md:pb-8">{children}</main>
 
-        <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[24px] bg-ink p-1.5 text-white shadow-[0_16px_40px_-16px_rgba(0,0,0,0.6)] md:hidden">
+        <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 gap-1 rounded-[24px] bg-ink p-1.5 text-white shadow-[0_16px_40px_-16px_rgba(0,0,0,0.6)] md:hidden">
           {navItems.map((item) => {
             const active = isActive(item.href);
             return (
