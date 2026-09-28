@@ -1,28 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import {
-  BarChart3,
-  BookOpen,
-  Columns3,
-  LogOut,
-  Repeat,
-  Settings,
-  Users,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/server/auth-client";
+import { APP_SHELL_NAV_ITEMS } from "@/lib/app-nav";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/review", label: "Review", icon: Repeat },
-  { href: "/kanban", label: "Kanban", icon: Columns3 },
-  { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/users", label: "People", icon: Users },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+const navItems = APP_SHELL_NAV_ITEMS;
 
 export function AppShell({
   children,
