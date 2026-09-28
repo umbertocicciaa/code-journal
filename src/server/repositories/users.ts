@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { user } from "@/server/db/schema";
 
@@ -11,6 +11,27 @@ export async function findUserByUsername(username: string) {
 export async function findUserById(id: string) {
   return db.query.user.findFirst({
     where: eq(user.id, id),
+  });
+}
+
+export async function searchUsers(query: string, limit = 20) {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const pattern = `%${trimmed}%`;
+
+  return db.query.user.findMany({
+    where: or(ilike(user.username, pattern), ilike(user.name, pattern)),
+    limit,
+    columns: {
+      id: true,
+      name: true,
+      username: true,
+      statsPublic: true,
+    },
+    orderBy: (users, { asc }) => [asc(users.username)],
   });
 }
 
