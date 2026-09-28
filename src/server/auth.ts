@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
+import { PASSWORD_RESET_TOKEN_TTL_SECONDS } from "@/lib/password-reset";
 import { db } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
+import { sendPasswordResetEmail } from "@/server/services/password-reset-email";
 
 const authSecret = process.env.BETTER_AUTH_SECRET;
 const authBaseURL = process.env.BETTER_AUTH_URL;
@@ -45,6 +47,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    resetPasswordTokenExpiresIn: PASSWORD_RESET_TOKEN_TTL_SECONDS,
+    sendResetPassword: async ({ user, url, token }) => {
+      await sendPasswordResetEmail({
+        user: { id: user.id, email: user.email, name: user.name },
+        url,
+        token,
+      });
+    },
   },
   plugins: [
     username({

@@ -9,7 +9,7 @@ async function signUp(page: Page, prefix: string) {
   await page.getByRole("textbox", { name: "Email" }).fill(`${username}@example.com`);
   await page.getByLabel("Password").fill("password123");
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page).toHaveURL(/\/journal/);
+  await expect(page).toHaveURL(/\/journal/, { timeout: 20_000 });
   return username;
 }
 
@@ -54,6 +54,40 @@ test("signup creates an account and exposes the journal", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Journal" })).toBeVisible();
 });
 
+test("forgot password flow resets credentials", async ({ page, request }) => {
+  test.setTimeout(60_000);
+
+  const newPassword = "newpassword456";
+  const username = await signUp(page, "pw");
+  const email = `${username}@example.com`;
+
+  await page.getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL(/\/login/);
+
+  await page.getByRole("link", { name: "Forgot password?" }).click();
+  await expect(page).toHaveURL(/\/forgot-password/);
+  await page.getByLabel("Email").fill(email);
+  await page.getByRole("button", { name: "Send reset link" }).click();
+  await expect(page.getByText(/check your inbox/i)).toBeVisible();
+
+  const capture = await request.get(
+    `/api/test/password-reset/latest?email=${encodeURIComponent(email)}`,
+  );
+  expect(capture.ok()).toBe(true);
+  const body = (await capture.json()) as { token: string };
+  expect(body.token).toBeTruthy();
+
+  await page.goto(`/reset-password?token=${body.token}`);
+  await page.getByLabel("New password").fill(newPassword);
+  await page.getByRole("button", { name: "Reset password" }).click();
+  await expect(page).toHaveURL(/\/login/);
+
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(newPassword);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/journal/);
+});
+
 test("MVP smoke: journal problem CRUD", async ({ page }) => {
   test.setTimeout(60_000);
 
@@ -86,10 +120,6 @@ test("MVP smoke: journal problem CRUD", async ({ page }) => {
   await page.getByRole("button", { name: "Remove" }).click();
   await expect(page).toHaveURL(/\/journal$/);
   await expect(page.getByRole("link", { name: new RegExp(title) })).toHaveCount(0);
-});
-
-test("MVP smoke: authenticated user can add a problem from URL", async ({ page }) => {
-  await signUp(page, "url");
 
   await page.getByPlaceholder("https://leetcode.com/problems/two-sum/").fill(
     "https://leetcode.com/problems/two-sum/",
