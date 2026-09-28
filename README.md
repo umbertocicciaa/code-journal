@@ -14,3 +14,7 @@ LeetCode/Neetcode journal with shared problem library, spaced repetition (Leitne
 - **Stats**: Heatmap, streaks, charts at `/stats`
 - **Public profiles**: `/u/[username]` when `statsPublic` is enabled
 - **LeetCode/Neetcode Premium cookies**: Optional encrypted credentials in Settings for company tags
+
+## License
+
+This project is released under the [MIT License](LICENSE).
